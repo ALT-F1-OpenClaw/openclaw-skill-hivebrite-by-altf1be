@@ -47,13 +47,29 @@ const OAUTH_TOKEN_PATH = resolve(homedir(), '.cache', 'openclaw', 'hivebrite-tok
 let _cachedAccessToken = null;
 let _tokenExpiresAt = 0;
 
+function hasBearerToken() {
+  return !!(process.env.HIVEBRITE_ACCESS_TOKEN && process.env.HIVEBRITE_ACCESS_TOKEN.trim());
+}
+
 function isOAuthMode() {
-  return !!process.env.HIVEBRITE_CLIENT_ID;
+  return !!(
+    process.env.HIVEBRITE_CLIENT_ID &&
+    process.env.HIVEBRITE_CLIENT_SECRET &&
+    (
+      process.env.HIVEBRITE_REFRESH_TOKEN ||
+      (process.env.HIVEBRITE_ADMIN_EMAIL && process.env.HIVEBRITE_ADMIN_PASSWORD)
+    )
+  );
 }
 
 async function getAccessToken() {
-  if (!isOAuthMode()) {
+  if (hasBearerToken()) {
     return env('HIVEBRITE_ACCESS_TOKEN');
+  }
+
+  if (!isOAuthMode()) {
+    console.error('ERROR: Configure either HIVEBRITE_ACCESS_TOKEN, or OAuth2 credentials: HIVEBRITE_CLIENT_ID + HIVEBRITE_CLIENT_SECRET + (HIVEBRITE_REFRESH_TOKEN or HIVEBRITE_ADMIN_EMAIL + HIVEBRITE_ADMIN_PASSWORD). See SKILL.md setup.');
+    process.exit(1);
   }
 
   // Check in-memory cache
