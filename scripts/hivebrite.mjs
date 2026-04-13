@@ -154,6 +154,7 @@ function getCfg() {
   if (!_cfg) {
     _cfg = {
       maxResults: parseInt(process.env.HIVEBRITE_MAX_RESULTS || '25', 10),
+      minRequestIntervalMs: parseInt(process.env.HIVEBRITE_MIN_REQUEST_INTERVAL_MS || '250', 10),
     };
   }
   return _cfg;
@@ -161,6 +162,8 @@ function getCfg() {
 const CFG = new Proxy({}, { get: (_, prop) => getCfg()[prop] });
 
 // ── HTTP client with rate-limit retry ────────────────────────────────────────
+
+let _lastApiRequestAt = 0;
 
 function apiBase(version = 'v2') {
   return `${env('HIVEBRITE_BASE_URL').replace(/\/+$/, '')}/api/admin/${version}`;
@@ -182,11 +185,17 @@ async function apiFetch(path, options = {}, retries = 3) {
   }
 
   for (let attempt = 1; attempt <= retries; attempt++) {
+    const waitMs = Math.max(0, CFG.minRequestIntervalMs - (Date.now() - _lastApiRequestAt));
+    if (waitMs > 0) {
+      await new Promise(r => setTimeout(r, waitMs));
+    }
+
     const resp = await fetch(url, { ...options, headers });
+    _lastApiRequestAt = Date.now();
 
     if (resp.status === 429) {
       const retryAfter = parseInt(resp.headers.get('retry-after') || '5', 10);
-      const backoff = retryAfter * 1000 * attempt;
+      const backoff = Math.max(retryAfter * 1000, CFG.minRequestIntervalMs * 4) * attempt;
       if (attempt < retries) {
         console.error(`Rate limited — retrying in ${(backoff / 1000).toFixed(0)}s (attempt ${attempt}/${retries})`);
         await new Promise(r => setTimeout(r, backoff));
