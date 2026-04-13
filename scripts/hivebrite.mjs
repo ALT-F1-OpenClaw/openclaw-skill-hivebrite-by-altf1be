@@ -301,13 +301,13 @@ function buildParams(options) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 async function cmdMe() {
-  const data = await apiFetch('/me');
-  const u = data;
+  const data = await apiFetch('/me', { _apiVersion: 'v1' });
+  const u = data.admin || data;
   console.log(`Current Admin`);
   console.log(`  ID:         ${u.id || '—'}`);
-  console.log(`  Name:       ${[u.firstname, u.lastname].filter(Boolean).join(' ') || '—'}`);
+  console.log(`  Name:       ${u.name || [u.firstname, u.lastname].filter(Boolean).join(' ') || '—'}`);
   console.log(`  Email:      ${u.email || '—'}`);
-  console.log(`  Role:       ${u.role || '—'}`);
+  console.log(`  Role:       ${u.admin_type || u.role || '—'}`);
   console.log(`  Created:    ${fmtDate(u.created_at)}`);
 }
 
