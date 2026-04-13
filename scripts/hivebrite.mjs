@@ -681,13 +681,13 @@ async function cmdEducationsCustomizableAttributes(options) {
 
 async function cmdEmailingCategoriesList(options) {
   const params = buildParams(options);
-  const data = await apiFetch(`/emailing/categories?${params}`);
+  const data = await apiFetch(`/emailings/categories?${params}`, { _apiVersion: 'v1' });
   const items = Array.isArray(data) ? data : data?.categories || [];
   displayList(items, c => `  ${String(c.id).padEnd(8)} ${c.name || '—'}`, data);
 }
 
 async function cmdEmailingCategoriesRead(options) {
-  const data = await apiFetch(`/emailing/categories/${options.id}`);
+  const data = await apiFetch(`/emailings/categories/${options.id}`, { _apiVersion: 'v1' });
   const c = data?.category || data;
   console.log(`Emailing Category #${c.id}`);
   console.log(`  Name:       ${c.name || '—'}`);
@@ -696,37 +696,39 @@ async function cmdEmailingCategoriesRead(options) {
 
 async function cmdEmailingCategoriesCreate(options) {
   if (!options.name) { console.error('ERROR: --name is required'); process.exit(1); }
-  const result = await apiFetch('/emailing/categories', {
+  const result = await apiFetch('/emailings/categories', {
     method: 'POST',
     body: JSON.stringify({ category: { name: options.name } }),
+    _apiVersion: 'v1',
   });
   const c = result?.category || result;
   console.log(`Created emailing category #${c.id}`);
 }
 
 async function cmdEmailingCategoriesUpdate(options) {
-  await apiFetch(`/emailing/categories/${options.id}`, {
+  await apiFetch(`/emailings/categories/${options.id}`, {
     method: 'PUT',
     body: JSON.stringify({ category: { name: options.name } }),
+    _apiVersion: 'v1',
   });
   console.log(`Updated emailing category #${options.id}`);
 }
 
 async function cmdEmailingCategoriesDelete(options) {
   if (!options.confirm) { console.error('ERROR: Delete requires --confirm flag for safety'); process.exit(1); }
-  await apiFetch(`/emailing/categories/${options.id}`, { method: 'DELETE' });
+  await apiFetch(`/emailings/categories/${options.id}`, { method: 'DELETE', _apiVersion: 'v1' });
   console.log(`Deleted emailing category #${options.id}`);
 }
 
 async function cmdEmailingCampaignsList(options) {
   const params = buildParams(options);
-  const data = await apiFetch(`/emailing/campaigns?${params}`);
+  const data = await apiFetch(`/emailings/campaigns?${params}`, { _apiVersion: 'v1' });
   const items = Array.isArray(data) ? data : data?.campaigns || [];
   displayList(items, c => `  ${String(c.id).padEnd(8)} ${(c.subject || c.name || '').padEnd(40)} status: ${c.status || '—'}`, data);
 }
 
 async function cmdEmailingCampaignsRead(options) {
-  const data = await apiFetch(`/emailing/campaigns/${options.id}`);
+  const data = await apiFetch(`/emailings/campaigns/${options.id}`, { _apiVersion: 'v1' });
   const c = data?.campaign || data;
   console.log(`Emailing Campaign #${c.id}`);
   console.log(`  Subject:    ${c.subject || '—'}`);
@@ -751,9 +753,10 @@ async function cmdEmailingCampaignsCreate(options) {
     process.exit(1);
   }
 
-  const result = await apiFetch('/emailing/campaigns', {
+  const result = await apiFetch('/emailings/campaigns', {
     method: 'POST',
     body: JSON.stringify({ campaign: body }),
+    _apiVersion: 'v1',
   });
   const c = result?.campaign || result;
   console.log(`Created emailing campaign #${c.id}`);
@@ -767,21 +770,22 @@ async function cmdEmailingCampaignsUpdate(options) {
   if (options.fromEmail) body.from_email = options.fromEmail;
   if (options.body) body.body = options.body;
 
-  await apiFetch(`/emailing/campaigns/${options.id}`, {
+  await apiFetch(`/emailings/campaigns/${options.id}`, {
     method: 'PUT',
     body: JSON.stringify({ campaign: body }),
+    _apiVersion: 'v1',
   });
   console.log(`Updated emailing campaign #${options.id}`);
 }
 
 async function cmdEmailingCampaignsDelete(options) {
   if (!options.confirm) { console.error('ERROR: Delete requires --confirm flag for safety'); process.exit(1); }
-  await apiFetch(`/emailing/campaigns/${options.id}`, { method: 'DELETE' });
+  await apiFetch(`/emailings/campaigns/${options.id}`, { method: 'DELETE', _apiVersion: 'v1' });
   console.log(`Deleted emailing campaign #${options.id}`);
 }
 
 async function cmdEmailingCampaignsSend(options) {
-  await apiFetch(`/emailing/campaigns/${options.id}/send`, { method: 'POST' });
+  await apiFetch(`/emailings/campaigns/${options.id}/send`, { method: 'POST', _apiVersion: 'v1' });
   console.log(`Sent emailing campaign #${options.id}`);
 }
 
@@ -884,13 +888,13 @@ function companyLabel(c) {
 async function cmdCompaniesList(options) {
   const params = buildParams(options);
   if (options.query) params.set('q', options.query);
-  const data = await apiFetch(`/companies?${params}`);
+  const data = await apiFetch(`/companies?${params}`, { _apiVersion: 'v1' });
   const items = Array.isArray(data) ? data : data?.companies || [];
   displayList(items, companyLabel, data);
 }
 
 async function cmdCompaniesRead(options) {
-  const data = await apiFetch(`/companies/${options.id}`);
+  const data = await apiFetch(`/companies/${options.id}`, { _apiVersion: 'v1' });
   const c = data?.company || data;
   console.log(`Company #${c.id}`);
   console.log(`  Name:       ${c.name || '—'}`);
@@ -915,6 +919,7 @@ async function cmdCompaniesCreate(options) {
   const result = await apiFetch('/companies', {
     method: 'POST',
     body: JSON.stringify({ company: body }),
+    _apiVersion: 'v1',
   });
   const c = result?.company || result;
   console.log(`Created company #${c.id}`);
@@ -932,13 +937,14 @@ async function cmdCompaniesUpdate(options) {
   await apiFetch(`/companies/${options.id}`, {
     method: 'PUT',
     body: JSON.stringify({ company: body }),
+    _apiVersion: 'v1',
   });
   console.log(`Updated company #${options.id}`);
 }
 
 async function cmdCompaniesDelete(options) {
   if (!options.confirm) { console.error('ERROR: Delete requires --confirm flag for safety'); process.exit(1); }
-  await apiFetch(`/companies/${options.id}`, { method: 'DELETE' });
+  await apiFetch(`/companies/${options.id}`, { method: 'DELETE', _apiVersion: 'v1' });
   console.log(`Deleted company #${options.id}`);
 }
 
@@ -1763,13 +1769,13 @@ async function cmdProjectTeamMembersRemove(options) {
 
 async function cmdMembershipTypesList(options) {
   const params = buildParams(options);
-  const data = await apiFetch(`/membership_types?${params}`);
+  const data = await apiFetch(`/memberships/types?${params}`);
   const items = Array.isArray(data) ? data : data?.membership_types || [];
   displayList(items, t => `  ${String(t.id).padEnd(8)} ${(t.name || '').padEnd(30)} price: ${t.price ?? '—'} ${t.currency || ''}`, data);
 }
 
 async function cmdMembershipTypesRead(options) {
-  const data = await apiFetch(`/membership_types/${options.id}`);
+  const data = await apiFetch(`/memberships/types/${options.id}`);
   const t = data?.membership_type || data;
   console.log(`Membership Type #${t.id}`);
   console.log(`  Name:       ${t.name || '—'}`);
@@ -1785,7 +1791,7 @@ async function cmdMembershipTypesCreate(options) {
   if (options.currency) body.currency = options.currency;
   if (options.duration) body.duration = options.duration;
 
-  const result = await apiFetch('/membership_types', {
+  const result = await apiFetch('/memberships/types', {
     method: 'POST',
     body: JSON.stringify({ membership_type: body }),
   });
@@ -1800,7 +1806,7 @@ async function cmdMembershipTypesUpdate(options) {
   if (options.currency) body.currency = options.currency;
   if (options.duration) body.duration = options.duration;
 
-  await apiFetch(`/membership_types/${options.id}`, {
+  await apiFetch(`/memberships/types/${options.id}`, {
     method: 'PUT',
     body: JSON.stringify({ membership_type: body }),
   });
@@ -1809,20 +1815,20 @@ async function cmdMembershipTypesUpdate(options) {
 
 async function cmdMembershipTypesDelete(options) {
   if (!options.confirm) { console.error('ERROR: Delete requires --confirm flag for safety'); process.exit(1); }
-  await apiFetch(`/membership_types/${options.id}`, { method: 'DELETE' });
+  await apiFetch(`/memberships/types/${options.id}`, { method: 'DELETE' });
   console.log(`Deleted membership type #${options.id}`);
 }
 
 async function cmdMembershipSubscriptionsList(options) {
   const params = buildParams(options);
   if (options.userId) params.set('user_id', options.userId);
-  const data = await apiFetch(`/membership_subscriptions?${params}`);
+  const data = await apiFetch(`/memberships/subscriptions?${params}`, { _apiVersion: 'v3' });
   const items = Array.isArray(data) ? data : data?.membership_subscriptions || [];
   displayList(items, s => `  ${String(s.id).padEnd(8)} user:${String(s.user_id || '').padEnd(6)} type:${String(s.membership_type_id || '').padEnd(6)} status: ${s.status || '—'}`, data);
 }
 
 async function cmdMembershipSubscriptionsRead(options) {
-  const data = await apiFetch(`/membership_subscriptions/${options.id}`);
+  const data = await apiFetch(`/memberships/subscriptions/${options.id}`, { _apiVersion: 'v3' });
   const s = data?.membership_subscription || data;
   console.log(`Subscription #${s.id}`);
   console.log(`  User ID:    ${s.user_id || '—'}`);
@@ -1840,9 +1846,10 @@ async function cmdMembershipSubscriptionsCreate(options) {
   if (options.startsAt) body.starts_at = options.startsAt;
   if (options.endsAt) body.ends_at = options.endsAt;
 
-  const result = await apiFetch('/membership_subscriptions', {
+  const result = await apiFetch('/memberships/subscriptions', {
     method: 'POST',
     body: JSON.stringify({ membership_subscription: body }),
+    _apiVersion: 'v3',
   });
   const s = result?.membership_subscription || result;
   console.log(`Created subscription #${s.id}`);
@@ -1854,22 +1861,23 @@ async function cmdMembershipSubscriptionsUpdate(options) {
   if (options.startsAt) body.starts_at = options.startsAt;
   if (options.endsAt) body.ends_at = options.endsAt;
 
-  await apiFetch(`/membership_subscriptions/${options.id}`, {
+  await apiFetch(`/memberships/subscriptions/${options.id}/renew`, {
     method: 'PUT',
     body: JSON.stringify({ membership_subscription: body }),
+    _apiVersion: 'v3',
   });
-  console.log(`Updated subscription #${options.id}`);
+  console.log(`Renewed subscription #${options.id}`);
 }
 
 async function cmdMembershipSubscriptionsDelete(options) {
   if (!options.confirm) { console.error('ERROR: Delete requires --confirm flag for safety'); process.exit(1); }
-  await apiFetch(`/membership_subscriptions/${options.id}`, { method: 'DELETE' });
+  await apiFetch(`/memberships/subscriptions/destroy?id=${options.id}`, { method: 'DELETE', _apiVersion: 'v3' });
   console.log(`Deleted subscription #${options.id}`);
 }
 
 async function cmdMembershipPaymentOptions(options) {
   const params = buildParams(options);
-  const data = await apiFetch(`/membership_types/${options.typeId}/payment_options?${params}`);
+  const data = await apiFetch(`/memberships/types/${options.typeId}/payment_options?${params}`);
   const items = Array.isArray(data) ? data : data?.payment_options || [];
   displayList(items, o => `  ${String(o.id).padEnd(8)} ${(o.name || '').padEnd(25)} price: ${o.price ?? '—'} ${o.currency || ''}`, data);
 }
@@ -2429,7 +2437,7 @@ async function cmdManualTransactionsDelete(options) {
 async function cmdEmailAnalyticsDeliveries(options) {
   const params = buildParams(options);
   if (options.campaignId) params.set('campaign_id', options.campaignId);
-  const data = await apiFetch(`/email_analytics/deliveries?${params}`);
+  const data = await apiFetch(`/email_analytics_v2/deliveries?${params}`, { _apiVersion: 'v3' });
   const items = Array.isArray(data) ? data : data?.deliveries || [];
   displayList(items, d => `  ${String(d.id || '').padEnd(8)} ${(d.email || '').padEnd(30)} status: ${d.status || '—'}  ${fmtDate(d.delivered_at)}`, data);
 }
