@@ -392,13 +392,13 @@ function userLabel(u) {
 async function cmdUsersList(options) {
   const params = buildParams(options);
   if (options.query) params.set('q', options.query);
-  const data = await apiFetch(`/admin/users?${params}`);
+  const data = await apiFetch(`/users?${params}`, { _apiVersion: 'v1' });
   const items = Array.isArray(data) ? data : data?.users || [];
   displayList(items, userLabel, data);
 }
 
 async function cmdUsersRead(options) {
-  const u = await apiFetch(`/admin/users/${options.id}`);
+  const u = await apiFetch(`/users/${options.id}`, { _apiVersion: 'v1' });
   const user = u?.user || u;
   console.log(`User #${user.id}`);
   console.log(`  Name:       ${[user.firstname, user.lastname].filter(Boolean).join(' ') || '—'}`);
@@ -426,9 +426,10 @@ async function cmdUsersCreate(options) {
     process.exit(1);
   }
 
-  const result = await apiFetch('/admin/users', {
+  const result = await apiFetch('/users', {
     method: 'POST',
     body: JSON.stringify({ user: body }),
+    _apiVersion: 'v1',
   });
   const u = result?.user || result;
   console.log(`Created user #${u.id}`);
@@ -443,9 +444,10 @@ async function cmdUsersUpdate(options) {
   if (options.headline) body.headline = options.headline;
   if (options.location) body.location = options.location;
 
-  await apiFetch(`/admin/users/${options.id}`, {
+  await apiFetch(`/users/${options.id}`, {
     method: 'PUT',
     body: JSON.stringify({ user: body }),
+    _apiVersion: 'v1',
   });
   console.log(`Updated user #${options.id}`);
 }
@@ -455,40 +457,40 @@ async function cmdUsersDelete(options) {
     console.error('ERROR: Delete requires --confirm flag for safety');
     process.exit(1);
   }
-  await apiFetch(`/admin/users/${options.id}`, { method: 'DELETE' });
+  await apiFetch(`/users/${options.id}`, { method: 'DELETE', _apiVersion: 'v1' });
   console.log(`Deleted user #${options.id}`);
 }
 
 async function cmdUsersExperiences(options) {
   const params = buildParams(options);
-  const data = await apiFetch(`/admin/users/${options.userId}/experiences?${params}`);
+  const data = await apiFetch(`/users/${options.userId}/experiences?${params}`, { _apiVersion: 'v1' });
   const items = Array.isArray(data) ? data : data?.experiences || [];
   displayList(items, e => `  ${String(e.id).padEnd(8)} ${(e.title || '').padEnd(25)} @ ${(e.organization_name || '').padEnd(20)} ${fmtDate(e.start_date)}–${fmtDate(e.end_date)}`, data);
 }
 
 async function cmdUsersEducations(options) {
   const params = buildParams(options);
-  const data = await apiFetch(`/admin/users/${options.userId}/educations?${params}`);
+  const data = await apiFetch(`/users/${options.userId}/educations?${params}`, { _apiVersion: 'v1' });
   const items = Array.isArray(data) ? data : data?.educations || [];
   displayList(items, e => `  ${String(e.id).padEnd(8)} ${(e.degree || '').padEnd(20)} @ ${(e.school_name || '').padEnd(25)} ${fmtDate(e.start_date)}–${fmtDate(e.end_date)}`, data);
 }
 
 async function cmdUsersNotificationSettings(options) {
-  const data = await apiFetch(`/admin/users/${options.userId}/notification_settings`);
+  const data = await apiFetch(`/users/${options.userId}/notification_settings`, { _apiVersion: 'v1' });
   const s = data?.notification_settings || data;
   console.log(`Notification settings for user #${options.userId}`);
   console.log(JSON.stringify(s, null, 2));
 }
 
 async function cmdUsersPostalAddresses(options) {
-  const data = await apiFetch(`/admin/users/${options.userId}/postal_addresses`);
+  const data = await apiFetch(`/users/${options.userId}/postal_addresses`, { _apiVersion: 'v1' });
   const items = Array.isArray(data) ? data : data?.postal_addresses || [];
   displayList(items, a => `  ${String(a.id).padEnd(8)} ${(a.address_1 || '').padEnd(30)} ${(a.city || '').padEnd(15)} ${a.country || '—'}`, data);
 }
 
 async function cmdUsersGroupMembership(options) {
   const params = buildParams(options);
-  const data = await apiFetch(`/admin/users/${options.userId}/groups?${params}`);
+  const data = await apiFetch(`/users/${options.userId}/groups?${params}`, { _apiVersion: 'v1' });
   const items = Array.isArray(data) ? data : data?.groups || [];
   displayList(items, g => `  ${String(g.id).padEnd(8)} ${g.name || '—'}`, data);
 }
@@ -497,7 +499,7 @@ async function cmdUsersFindByField(options) {
   const params = new URLSearchParams();
   if (options.field) params.set('field', options.field);
   if (options.value) params.set('value', options.value);
-  const data = await apiFetch(`/admin/users/find_by_field?${params}`);
+  const data = await apiFetch(`/users/find_by_field?${params}`, { _apiVersion: 'v1' });
   const u = data?.user || data;
   if (u?.id) {
     console.log(userLabel(u));
@@ -511,15 +513,16 @@ async function cmdUsersNotify(options) {
   if (options.subject) body.subject = options.subject;
   if (options.message) body.message = options.message;
 
-  await apiFetch(`/admin/users/${options.id}/notify`, {
+  await apiFetch(`/users/${options.id}/notify`, {
     method: 'POST',
     body: JSON.stringify(body),
+    _apiVersion: 'v1',
   });
   console.log(`Notification sent to user #${options.id}`);
 }
 
 async function cmdUsersActivate(options) {
-  await apiFetch(`/admin/users/${options.id}/activate`, { method: 'PUT' });
+  await apiFetch(`/users/${options.id}/activate`, { method: 'POST', _apiVersion: 'v1' });
   console.log(`Activated user #${options.id}`);
 }
 
